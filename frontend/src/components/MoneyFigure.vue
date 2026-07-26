@@ -41,10 +41,11 @@ const decimalTones = {
     first. tabular-nums keeps columns of figures aligned.
   -->
   <span class="font-display font-semibold tracking-tight tabular-nums" :class="[sizes[size], tones[tone]]">
-    <span class="mr-0.5 align-baseline text-[0.6em] font-medium opacity-60">GH₵</span>
-    <span :aria-hidden="true">{{ parts.units }}</span>
-    <span :aria-hidden="true" class="text-[0.65em] font-medium" :class="decimalTones[tone]">
-      .{{ parts.decimals }}
+    <!-- Visual parts are hidden from assistive tech; the sr-only span below
+         carries the single, correctly formatted amount. -->
+    <span aria-hidden="true">
+      <span class="mr-0.5 align-baseline text-[0.6em] font-medium opacity-60">GH₵</span>{{ parts.units
+      }}<span class="text-[0.65em] font-medium" :class="decimalTones[tone]">.{{ parts.decimals }}</span>
     </span>
     <span class="sr-only">{{ formatMoney(amount) }}</span>
   </span>

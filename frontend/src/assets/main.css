@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens — single source of truth for the visual system.
+ * Tailwind v4 CSS-first config: every token here becomes a utility
+ * (bg-brand-600, text-danger-700, rounded-card, shadow-card, …).
+ */
+@theme {
+  /* Brand — deep navy, echoing the Kudi Systems identity */
+  --color-brand-50: #eef4fb;
+  --color-brand-100: #d9e6f6;
+  --color-brand-200: #b3cdec;
+  --color-brand-300: #83abdd;
+  --color-brand-400: #4f83c9;
+  --color-brand-500: #2f65b0;
+  --color-brand-600: #234e92;
+  --color-brand-700: #1d3f76;
+  --color-brand-800: #1a3560;
+  --color-brand-900: #182d4f;
+  --color-brand-950: #101d34;
+
+  /* Accent — Kudi red, used sparingly (brand marks, destructive emphasis) */
+  --color-accent-500: #e11d2e;
+  --color-accent-600: #c11425;
+
+  /* Status palette */
+  --color-success-50: #ecfdf3;
+  --color-success-100: #d1fadf;
+  --color-success-600: #079455;
+  --color-success-700: #067647;
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+  --color-danger-50: #fef3f2;
+  --color-danger-100: #fee4e2;
+  --color-danger-600: #d92d20;
+  --color-danger-700: #b42318;
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+
+  /* Radii + elevation */
+  --radius-card: 0.75rem;
+  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.06), 0 1px 3px 0 rgb(16 24 40 / 0.1);
+  --shadow-card-hover: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.06);
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+
+  /* Visible focus for every interactive element — keyboard-first a11y */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}

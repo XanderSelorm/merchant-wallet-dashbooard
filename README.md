@@ -62,6 +62,20 @@ positive-balance-only rule, and settlement idempotency.
 
 ---
 
+## Screens
+
+| | |
+| --- | --- |
+| ![Dashboard](docs/screenshots/02-dashboard.png) | ![Merchants](docs/screenshots/03-merchants.png) |
+| **Overview** — wallet float, volume, fees, settled, 14-day chart, recent activity | **Merchants** — search, status filter, wallet balances, activate/deactivate |
+| ![Payment form](docs/screenshots/06-payment-form.png) | ![Settlement confirmation](docs/screenshots/07-settlement-confirm.png) |
+| **Simulate a payment** — live gross/fee/net preview and projected balance | **Run settlement** — itemises which wallets will be swept, and for how much |
+
+More in [`docs/screenshots/`](docs/screenshots): merchant detail, transaction list, settlement
+history, reports, the design-system page, and a mobile view.
+
+---
+
 ## What the seed data gives you
 
 Seeding is built to exercise every UI state without hand-crafting data:

@@ -17,13 +17,12 @@ const dashboard = useDashboardStore()
 const summary = computed(() => dashboard.summary)
 
 /**
- * Deliberately narrow: this card sits in a two-fifths column, so it carries
- * only what identifies a payment. The full reference and fee breakdown live
- * on the payments page.
+ * Three columns only: this card sits in a two-fifths column, and a fourth
+ * would clip. The timestamp rides under the merchant name instead, and the
+ * reference and fee breakdown live on the payments page.
  */
 const columns: Column<Transaction>[] = [
   { key: 'merchant', label: 'Merchant' },
-  { key: 'date', label: 'When', hideBelow: 'sm' },
   { key: 'status', label: 'Status' },
   { key: 'net', label: 'Net credit', align: 'right' },
 ]
@@ -128,7 +127,9 @@ onMounted(() => dashboard.fetchSummary())
         </div>
       </div>
 
-      <div class="grid gap-6 xl:grid-cols-5">
+      <!-- items-start so the chart card keeps its natural height instead of
+           stretching to match the activity list beside it -->
+      <div class="grid items-start gap-6 xl:grid-cols-5">
         <BaseCard title="Payment volume — last 14 days" class="xl:col-span-3">
           <VolumeChart :series="summary.volume_by_day" />
         </BaseCard>
@@ -154,14 +155,12 @@ onMounted(() => dashboard.fetchSummary())
               <RouterLink
                 v-if="row.merchant"
                 :to="{ name: 'merchant-detail', params: { id: row.merchant_id } }"
-                class="rounded font-medium text-slate-900 transition-colors hover:text-brand-700"
+                class="block rounded font-medium text-slate-900 transition-colors hover:text-brand-700"
               >
                 {{ row.merchant.business_name }}
               </RouterLink>
-              <span v-else class="text-slate-500">—</span>
-            </template>
-            <template #cell:date="{ row }">
-              <span class="text-slate-500">{{ formatDateTime(row.created_at) }}</span>
+              <span v-else class="block text-slate-500">—</span>
+              <span class="text-xs text-slate-500">{{ formatDateTime(row.created_at) }}</span>
             </template>
             <template #cell:status="{ row }">
               <StatusBadge :status="row.status" />

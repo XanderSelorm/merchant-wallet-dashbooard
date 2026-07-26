@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ReportSummaryController;
 use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/settlements/run', [SettlementController::class, 'run']);
 
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
+    Route::get('/reports/summary', ReportSummaryController::class);
 
     Route::get('/exports/transactions', [ExportController::class, 'transactions']);
     Route::get('/exports/settlements', [ExportController::class, 'settlements']);

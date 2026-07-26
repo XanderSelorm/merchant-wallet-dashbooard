@@ -69,16 +69,50 @@ function fullDate(iso: string): string {
 
 /** Show every other day label so ticks never collide on narrow screens. */
 const showLabel = (index: number) => index % 2 === props.series.length % 2
+
+/**
+ * Keyboard access to the same detail the tooltip gives on hover. The chart is
+ * one tab stop rather than fourteen; arrows walk the days.
+ */
+function onFocus() {
+  if (hovered.value === null) hovered.value = props.series.length - 1
+}
+
+function onKeydown(event: KeyboardEvent) {
+  const last = props.series.length - 1
+  const current = hovered.value ?? last
+  const moves: Record<string, number> = {
+    ArrowLeft: Math.max(current - 1, 0),
+    ArrowRight: Math.min(current + 1, last),
+    Home: 0,
+    End: last,
+  }
+
+  if (event.key === 'Escape') {
+    hovered.value = null
+    return
+  }
+
+  if (event.key in moves) {
+    event.preventDefault()
+    hovered.value = moves[event.key]
+  }
+}
 </script>
 
 <template>
   <figure class="relative">
     <svg
       :viewBox="`0 0 ${PLOT.width} ${PLOT.height}`"
-      class="w-full"
+      class="w-full rounded-lg"
       role="img"
+      tabindex="0"
       aria-labelledby="volume-chart-caption"
+      :aria-describedby="tooltip ? 'volume-chart-readout' : undefined"
       @mouseleave="hovered = null"
+      @focus="onFocus"
+      @blur="hovered = null"
+      @keydown="onKeydown"
     >
       <g aria-hidden="true">
         <line
@@ -157,6 +191,7 @@ const showLabel = (index: number) => index % 2 === props.series.length % 2
     <!-- Tooltip carries the second measure without a second axis -->
     <div
       v-if="tooltip"
+      id="volume-chart-readout"
       class="pointer-events-none absolute -translate-x-1/2 rounded-lg bg-brand-950 px-2.5 py-2 text-xs whitespace-nowrap text-white shadow-lg"
       :style="{ left: `${((tooltip.x + barWidth / 2) / PLOT.width) * 100}%`, bottom: '2.75rem' }"
     >
@@ -164,6 +199,13 @@ const showLabel = (index: number) => index % 2 === props.series.length % 2
       <p class="mt-0.5 text-white/70">Volume {{ formatMoney(tooltip.volume) }}</p>
       <p class="text-white/70">Fees {{ formatMoney(tooltip.fees) }}</p>
     </div>
+
+    <!-- States that per-day detail exists; bars alone do not disclose it -->
+    <p class="mt-2 text-xs text-slate-500">
+      Hover a day for volume and fees, or focus the chart and use
+      <kbd class="rounded border border-slate-300 px-1 font-sans text-2xs text-slate-600">←</kbd>
+      <kbd class="rounded border border-slate-300 px-1 font-sans text-2xs text-slate-600">→</kbd>
+    </p>
 
     <figcaption id="volume-chart-caption" class="sr-only">
       Successful payment volume per day over the last 14 days, with fees earned.

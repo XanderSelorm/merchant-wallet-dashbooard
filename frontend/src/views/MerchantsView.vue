@@ -155,11 +155,7 @@ onMounted(() => {
         <template #cell:actions="{ row }">
           <div class="flex items-center justify-end gap-1" @click.stop>
             <BaseButton variant="ghost" size="sm" @click="openMerchant(row)">View</BaseButton>
-            <BaseButton
-              :variant="row.status === 'active' ? 'ghost' : 'secondary'"
-              size="sm"
-              @click="pendingToggle = row"
-            >
+            <BaseButton variant="ghost" size="sm" @click="pendingToggle = row">
               {{ row.status === 'active' ? 'Deactivate' : 'Activate' }}
             </BaseButton>
           </div>

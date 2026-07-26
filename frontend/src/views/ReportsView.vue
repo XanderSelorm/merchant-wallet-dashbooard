@@ -13,8 +13,8 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import type { Column } from '@/components/base/table'
 import { formatDate, formatDateTime, formatMoney } from '@/lib/money'
 import { useCsvExport } from '@/composables/useCsvExport'
-import { useDashboardStore } from '@/stores/dashboard'
 import { useMerchantsStore } from '@/stores/merchants'
+import { useReportsStore } from '@/stores/reports'
 import { useSettlementsStore } from '@/stores/settlements'
 import { useTransactionsStore } from '@/stores/transactions'
 import type { Settlement, Transaction, TransactionStatus } from '@/types/api'
@@ -24,7 +24,7 @@ type Tab = 'transactions' | 'settlements'
 const transactions = useTransactionsStore()
 const settlements = useSettlementsStore()
 const merchants = useMerchantsStore()
-const dashboard = useDashboardStore()
+const reports = useReportsStore()
 const { exporting, download } = useCsvExport()
 
 const tab = ref<Tab>('transactions')
@@ -72,7 +72,28 @@ const activeParams = computed(() => ({
   date_to: dateTo.value || undefined,
 }))
 
+/** Human-readable description of the range the totals cover. */
+const rangeLabel = computed(() => {
+  const from = dateFrom.value ? formatDate(dateFrom.value) : null
+  const to = dateTo.value ? formatDate(dateTo.value) : null
+
+  if (from && to) return `${from} – ${to}`
+  if (from) return `From ${from}`
+  if (to) return `Up to ${to}`
+  return 'All time'
+})
+
+const merchantLabel = computed(
+  () => merchants.options.find((m) => m.id === merchantId.value)?.business_name ?? null,
+)
+
 function fetchActive() {
+  reports.fetchSummary({
+    merchant_id: merchantId.value,
+    date_from: dateFrom.value,
+    date_to: dateTo.value,
+  })
+
   if (tab.value === 'transactions') {
     transactions.filters.search = ''
     transactions.filters.status = status.value
@@ -111,7 +132,6 @@ function goToPage(page: number) {
 
 onMounted(() => {
   merchants.fetchOptions()
-  dashboard.fetchSummary()
   fetchActive()
 })
 </script>
@@ -145,30 +165,57 @@ onMounted(() => {
       </template>
     </PageHeader>
 
-    <!-- Platform fees earned, the headline reporting figure -->
-    <div class="mb-6 grid gap-4 sm:grid-cols-3">
-      <div class="rounded-card bg-white p-5 shadow-card">
-        <p class="text-2xs tracking-wider text-slate-500 uppercase">Total platform fees earned</p>
-        <p class="mt-2.5">
-          <MoneyFigure :amount="dashboard.summary?.total_fees_earned ?? 0" size="lg" />
+    <!--
+      Totals are scoped to the filters below, not platform-wide — otherwise
+      they would just restate the dashboard. The banner names the scope so the
+      figures are never ambiguous.
+    -->
+    <section class="mb-6 rounded-card bg-white shadow-card" aria-labelledby="report-totals">
+      <header
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-slate-100 px-5 py-3"
+      >
+        <h2 id="report-totals" class="text-2xs font-semibold tracking-wider text-slate-500 uppercase">
+          Totals for this selection
+        </h2>
+        <p class="text-xs text-slate-500">
+          <span class="font-medium text-slate-700">{{ rangeLabel }}</span>
+          <template v-if="merchantLabel">
+            · <span class="font-medium text-slate-700">{{ merchantLabel }}</span>
+          </template>
+          <template v-else> · all merchants</template>
         </p>
-        <p class="mt-1.5 text-xs text-slate-500">1.5% of all successful payment volume</p>
-      </div>
-      <div class="rounded-card bg-white p-5 shadow-card">
-        <p class="text-2xs tracking-wider text-slate-500 uppercase">Payment volume</p>
-        <p class="mt-2.5">
-          <MoneyFigure :amount="dashboard.summary?.total_payment_volume ?? 0" size="lg" />
-        </p>
-        <p class="mt-1.5 text-xs text-slate-500">Gross value of successful payments</p>
-      </div>
-      <div class="rounded-card bg-white p-5 shadow-card">
-        <p class="text-2xs tracking-wider text-slate-500 uppercase">Settled to date</p>
-        <p class="mt-2.5">
-          <MoneyFigure :amount="dashboard.summary?.total_settled ?? 0" size="lg" />
-        </p>
-        <p class="mt-1.5 text-xs text-slate-500">Swept from wallets to merchant banks</p>
-      </div>
-    </div>
+      </header>
+
+      <dl class="grid divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div class="p-5">
+          <dt class="text-2xs tracking-wider text-slate-500 uppercase">Platform fees earned</dt>
+          <dd class="mt-2.5">
+            <MoneyFigure :amount="reports.summary?.total_fees_earned ?? 0" size="lg" />
+          </dd>
+          <dd class="mt-1.5 text-xs text-slate-500">1.5% of successful payment volume</dd>
+        </div>
+        <div class="p-5">
+          <dt class="text-2xs tracking-wider text-slate-500 uppercase">Payment volume</dt>
+          <dd class="mt-2.5">
+            <MoneyFigure :amount="reports.summary?.total_payment_volume ?? 0" size="lg" />
+          </dd>
+          <dd class="mt-1.5 text-xs text-slate-500">
+            Across {{ reports.summary?.successful_count ?? 0 }} successful
+            {{ reports.summary?.successful_count === 1 ? 'payment' : 'payments' }}
+          </dd>
+        </div>
+        <div class="p-5">
+          <dt class="text-2xs tracking-wider text-slate-500 uppercase">Settled</dt>
+          <dd class="mt-2.5">
+            <MoneyFigure :amount="reports.summary?.total_settled ?? 0" size="lg" />
+          </dd>
+          <dd class="mt-1.5 text-xs text-slate-500">
+            Across {{ reports.summary?.settlement_count ?? 0 }}
+            {{ reports.summary?.settlement_count === 1 ? 'settlement' : 'settlements' }}
+          </dd>
+        </div>
+      </dl>
+    </section>
 
     <BaseCard flush>
       <div class="border-b border-slate-100 px-4 pt-4">

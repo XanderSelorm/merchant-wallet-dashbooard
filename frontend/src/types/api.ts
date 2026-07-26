@@ -66,6 +66,16 @@ export interface DashboardSummary {
   volume_by_day: { date: string; volume: number; fees: number }[]
 }
 
+/** Totals for the reports view, scoped to whatever filters are active. */
+export interface ReportSummary {
+  total_payment_volume: number
+  total_fees_earned: number
+  successful_count: number
+  total_settled: number
+  settlement_count: number
+  filtered: boolean
+}
+
 export interface User {
   id: number
   name: string

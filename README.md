@@ -57,8 +57,8 @@ add the frontend origin to `SANCTUM_STATEFUL_DOMAINS` and `FRONTEND_URL` in `bac
 cd backend && ./vendor/bin/pest
 ```
 
-16 tests / 42 assertions covering fee calculation and rounding, ledger correctness, the
-positive-balance-only rule, and settlement idempotency.
+21 tests / 51 assertions covering fee calculation and rounding, ledger correctness, the
+positive-balance-only rule, settlement idempotency, and the scoping of the reports summary.
 
 ---
 
@@ -72,7 +72,8 @@ positive-balance-only rule, and settlement idempotency.
 | **Simulate a payment** — live gross/fee/net preview and projected balance | **Run settlement** — itemises which wallets will be swept, and for how much |
 
 More in [`docs/screenshots/`](docs/screenshots): merchant detail, transaction list, settlement
-history, reports, the design-system page, and a mobile view.
+history, filtered reports, [empty states](docs/screenshots/12-empty-state.png), the design-system
+page, and a mobile view.
 
 ---
 
@@ -190,7 +191,8 @@ All `/api/*` routes require an authenticated Sanctum session.
 | `POST` | `/api/payments` | Simulate a payment (`merchant_id`, `amount` in pesewas, `reference`) |
 | `GET` | `/api/settlements` | List — `merchant_id`, `date_from`, `date_to` |
 | `POST` | `/api/settlements/run` | Sweep positive balances |
-| `GET` | `/api/dashboard/summary` | Aggregates, status counts, recent activity, 14-day series |
+| `GET` | `/api/dashboard/summary` | Platform-wide aggregates, status counts, recent activity, 14-day series |
+| `GET` | `/api/reports/summary` | Volume, fees and settled **scoped to** `merchant_id`, `date_from`, `date_to` |
 | `GET` | `/api/exports/transactions` | CSV, honours the transaction list filters |
 | `GET` | `/api/exports/settlements` | CSV, honours the settlement list filters |
 

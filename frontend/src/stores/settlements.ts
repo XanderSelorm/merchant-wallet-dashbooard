@@ -9,13 +9,19 @@ export const useSettlementsStore = defineStore('settlements', () => {
   const meta = ref<Paginated<Settlement>['meta'] | null>(null)
   const loading = ref(false)
   const running = ref(false)
-  const filters = reactive({ date_from: '', date_to: '', page: 1 })
+  const filters = reactive({
+    merchant_id: '' as number | '',
+    date_from: '',
+    date_to: '',
+    page: 1,
+  })
 
   async function fetchList(): Promise<void> {
     loading.value = true
     try {
       const { data } = await http.get<Paginated<Settlement>>('/api/settlements', {
         params: {
+          merchant_id: filters.merchant_id || undefined,
           date_from: filters.date_from || undefined,
           date_to: filters.date_to || undefined,
           page: filters.page,

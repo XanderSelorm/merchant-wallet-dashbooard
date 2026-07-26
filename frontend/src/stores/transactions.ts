@@ -18,6 +18,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const filters = reactive({
     search: '',
     status: '' as TransactionStatus | '',
+    merchant_id: '' as number | '',
     date_from: '',
     date_to: '',
     page: 1,
@@ -30,6 +31,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
         params: {
           search: filters.search || undefined,
           status: filters.status || undefined,
+          merchant_id: filters.merchant_id || undefined,
           date_from: filters.date_from || undefined,
           date_to: filters.date_to || undefined,
           page: filters.page,

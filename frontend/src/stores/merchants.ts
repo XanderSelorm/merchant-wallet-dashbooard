@@ -22,6 +22,19 @@ export const useMerchantsStore = defineStore('merchants', () => {
   const currentTransactions = ref<Paginated<Transaction> | null>(null)
   const currentSettlements = ref<Paginated<Settlement> | null>(null)
 
+  /**
+   * Unpaginated list backing merchant pickers, kept separate from `list` so
+   * table filters and dropdown options never fight over the same state.
+   */
+  const options = ref<Merchant[]>([])
+
+  async function fetchOptions(): Promise<void> {
+    const { data } = await http.get<Paginated<Merchant>>('/api/merchants', {
+      params: { per_page: 200 },
+    })
+    options.value = data.data
+  }
+
   async function fetchList(): Promise<void> {
     loading.value = true
     try {
@@ -68,6 +81,7 @@ export const useMerchantsStore = defineStore('merchants', () => {
 
     const updated = data.data
     list.value = list.value.map((m) => (m.id === updated.id ? { ...m, ...updated } : m))
+    options.value = options.value.map((m) => (m.id === updated.id ? { ...m, ...updated } : m))
     if (current.value?.id === updated.id) current.value = { ...current.value, ...updated }
 
     return updated
@@ -78,10 +92,12 @@ export const useMerchantsStore = defineStore('merchants', () => {
     meta,
     loading,
     filters,
+    options,
     current,
     currentTransactions,
     currentSettlements,
     fetchList,
+    fetchOptions,
     fetchOne,
     fetchTransactions,
     fetchSettlements,

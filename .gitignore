@@ -2,3 +2,6 @@
 
 # Local editor/agent config
 .claude/
+
+# Editor config
+.vscode/

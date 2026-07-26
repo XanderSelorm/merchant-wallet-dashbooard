@@ -5,7 +5,7 @@ import BaseCard from '@/components/base/BaseCard.vue'
 
 <template>
   <div>
-    <PageHeader title="Overview" subtitle="Coming up in a later phase." />
+    <PageHeader title="Merchants" subtitle="Coming up in a later phase." />
     <BaseCard>
       <p class="text-sm text-slate-500">This view is scaffolded and routed.</p>
     </BaseCard>

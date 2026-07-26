@@ -163,7 +163,7 @@ onMounted(() => {
           >
             {{ row.merchant.business_name }}
           </RouterLink>
-          <span v-else class="text-slate-400">—</span>
+          <span v-else class="text-slate-500">—</span>
         </template>
 
         <template #cell:date="{ row }">

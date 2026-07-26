@@ -20,19 +20,28 @@ watch(open, async (isOpen) => {
   if (isOpen) {
     previouslyFocused = document.activeElement as HTMLElement | null
     await nextTick()
-    focusables()[0]?.focus() ?? panel.value?.focus()
+
+    // Prefer the first field over the close button, so a keyboard user lands
+    // where they can start typing rather than on "dismiss".
+    const target = firstField() ?? focusables()[0] ?? panel.value
+    target?.focus()
   } else {
     previouslyFocused?.focus()
   }
 })
 
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
 function focusables(): HTMLElement[] {
   if (!panel.value) return []
-  return Array.from(
-    panel.value.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    ),
-  )
+  return Array.from(panel.value.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+}
+
+function firstField(): HTMLElement | null {
+  return panel.value?.querySelector<HTMLElement>(
+    'input:not([disabled]), select:not([disabled]), textarea:not([disabled])',
+  ) ?? null
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -96,7 +105,7 @@ const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl' }
               </div>
               <button
                 type="button"
-                class="-mt-1 -mr-1 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                class="-mt-1 -mr-1 rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-600"
                 @click="open = false"
               >
                 <span class="sr-only">Close</span>

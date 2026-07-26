@@ -29,9 +29,9 @@ const tones = {
 }
 
 const decimalTones = {
-  default: 'text-slate-400',
+  default: 'text-slate-500',
   inverse: 'text-white/55',
-  muted: 'text-slate-400',
+  muted: 'text-slate-500',
 }
 </script>
 

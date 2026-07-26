@@ -170,7 +170,7 @@ watch(open, (isOpen) => {
             </dd>
           </div>
           <div class="flex items-baseline justify-between gap-4">
-            <dt class="text-slate-600">Processing fee <span class="text-slate-400">(1.5%)</span></dt>
+            <dt class="text-slate-600">Processing fee <span class="text-slate-500">(1.5%)</span></dt>
             <dd class="font-medium tabular-nums text-danger-700">
               {{ feeMinorUnits === null ? '—' : `−${formatMoney(feeMinorUnits)}` }}
             </dd>

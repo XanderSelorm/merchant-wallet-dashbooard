@@ -96,7 +96,7 @@ const showLabel = (index: number) => index % 2 === props.series.length % 2
           :key="`label-${line.fraction}`"
           :x="PLOT.left + 2"
           :y="line.y - 4"
-          class="fill-slate-400 text-[10px]"
+          class="fill-slate-500 text-[10px]"
         >
           {{ line.label }}
         </text>
@@ -136,7 +136,7 @@ const showLabel = (index: number) => index % 2 === props.series.length % 2
           :x="bar.x + barWidth / 2"
           :y="PLOT.height - 10"
           text-anchor="middle"
-          class="fill-slate-400 text-[10px]"
+          class="fill-slate-500 text-[10px]"
         >
           {{ dayLabel(bar.date) }}
         </text>

@@ -241,7 +241,7 @@ onMounted(() => {
           >
             {{ row.merchant.business_name }}
           </RouterLink>
-          <span v-else class="text-slate-400">—</span>
+          <span v-else class="text-slate-500">—</span>
         </template>
         <template #cell:date="{ row }">
           <span class="text-slate-500">{{ formatDateTime(row.created_at) }}</span>
@@ -258,7 +258,7 @@ onMounted(() => {
         <template #cell:net="{ row }">
           <span
             class="font-medium tabular-nums"
-            :class="row.status === 'successful' ? 'text-slate-900' : 'text-slate-400'"
+            :class="row.status === 'successful' ? 'text-slate-900' : 'text-slate-500'"
           >
             {{ formatMoney(row.net_amount) }}
           </span>
@@ -285,7 +285,7 @@ onMounted(() => {
           >
             {{ row.merchant.business_name }}
           </RouterLink>
-          <span v-else class="text-slate-400">—</span>
+          <span v-else class="text-slate-500">—</span>
         </template>
         <template #cell:date="{ row }">
           <span class="text-slate-600">{{ formatDate(row.settled_on) }}</span>

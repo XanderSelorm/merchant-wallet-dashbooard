@@ -17,9 +17,14 @@ const dotStyles = {
 </script>
 
 <template>
-  <!-- Polite live region so outcomes are announced without stealing focus -->
+  <!--
+    Polite live region so outcomes are announced without stealing focus.
+    Anchored bottom-right and sized to its content rather than spanning
+    inset-x-0: a full-width fixed box resolves against the viewport including
+    the scrollbar gutter, which adds horizontal page scroll.
+  -->
   <div
-    class="pointer-events-none fixed inset-x-0 bottom-0 z-60 flex flex-col items-center gap-2 p-4 sm:items-end"
+    class="pointer-events-none fixed right-0 bottom-0 z-60 flex flex-col items-end gap-2 p-4"
     role="status"
     aria-live="polite"
   >
@@ -32,14 +37,14 @@ const dotStyles = {
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl px-4 py-3 shadow-lg ring-1"
+        class="pointer-events-auto flex w-[calc(100vw-2rem)] max-w-sm items-start gap-3 rounded-xl px-4 py-3 shadow-lg ring-1"
         :class="styles[toast.variant]"
       >
         <span class="mt-1.5 size-2 shrink-0 rounded-full" :class="dotStyles[toast.variant]" />
         <p class="flex-1 text-sm">{{ toast.message }}</p>
         <button
           type="button"
-          class="-mt-0.5 -mr-1 rounded p-1 text-slate-400 transition-colors hover:text-slate-700"
+          class="-mt-0.5 -mr-1 rounded p-1 text-slate-500 transition-colors hover:text-slate-700"
           @click="dismiss(toast.id)"
         >
           <span class="sr-only">Dismiss</span>

@@ -164,7 +164,7 @@ onMounted(async () => {
           >
             {{ row.merchant.business_name }}
           </RouterLink>
-          <span v-else class="text-slate-400">—</span>
+          <span v-else class="text-slate-500">—</span>
         </template>
 
         <template #cell:date="{ row }">
@@ -186,7 +186,7 @@ onMounted(async () => {
         <template #cell:net="{ row }">
           <span
             class="font-medium tabular-nums"
-            :class="row.status === 'successful' ? 'text-slate-900' : 'text-slate-400'"
+            :class="row.status === 'successful' ? 'text-slate-900' : 'text-slate-500'"
             :title="row.status === 'successful' ? undefined : 'Only successful payments credit the wallet'"
           >
             {{ formatMoney(row.net_amount) }}

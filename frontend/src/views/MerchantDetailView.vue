@@ -200,7 +200,7 @@ onMounted(load)
             <template #cell:net="{ row }">
               <span
                 class="font-medium tabular-nums"
-                :class="row.status === 'successful' ? 'text-slate-900' : 'text-slate-400'"
+                :class="row.status === 'successful' ? 'text-slate-900' : 'text-slate-500'"
               >
                 {{ formatMoney(row.net_amount) }}
               </span>

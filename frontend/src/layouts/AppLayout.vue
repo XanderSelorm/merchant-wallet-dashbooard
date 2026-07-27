@@ -18,12 +18,28 @@ const loggingOut = ref(false)
 watch(() => route.fullPath, () => (navOpen.value = false))
 
 const nav = [
-  { to: { name: 'dashboard' }, label: 'Overview', icon: 'grid' },
-  { to: { name: 'merchants' }, label: 'Merchants', icon: 'store' },
-  { to: { name: 'transactions' }, label: 'Payments', icon: 'arrows' },
-  { to: { name: 'settlements' }, label: 'Settlements', icon: 'bank' },
-  { to: { name: 'reports' }, label: 'Reports', icon: 'chart' },
+  { to: { name: 'dashboard' }, label: 'Overview', icon: 'grid', exact: true },
+  { to: { name: 'merchants' }, label: 'Merchants', icon: 'store', exact: false },
+  { to: { name: 'transactions' }, label: 'Payments', icon: 'arrows', exact: false },
+  { to: { name: 'settlements' }, label: 'Settlements', icon: 'bank', exact: false },
+  { to: { name: 'reports' }, label: 'Reports', icon: 'chart', exact: false },
 ] as const
+
+/**
+ * Highlighting is computed from the path rather than RouterLink's own active
+ * state, which cannot express what this nav needs:
+ *
+ *  - Overview points at "/", an ancestor of every route, so inclusive
+ *    matching would light it up on every page — hence `exact`.
+ *  - Merchant detail (/merchants/8) is a *sibling* route of the list, not a
+ *    child, so RouterLink does not consider it to include /merchants. A
+ *    prefix check keeps the section lit while viewing one merchant.
+ */
+function isNavActive(item: (typeof nav)[number]): boolean {
+  const target = router.resolve(item.to).path
+
+  return item.exact ? route.path === target : route.path === target || route.path.startsWith(`${target}/`)
+}
 
 const icons: Record<string, string> = {
   grid: 'M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z',
@@ -106,24 +122,30 @@ const initials = (name: string) =>
         <nav aria-label="Main">
           <ul class="space-y-0.5">
             <li v-for="item in nav" :key="item.label">
-              <RouterLink
-                :to="item.to"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/65 transition-colors hover:bg-white/8 hover:text-white"
-                active-class="bg-white/12 text-white"
-              >
-                <svg
-                  class="size-4.5 shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.75"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
+              <!-- Slot API so the highlight and aria-current both come from
+                   isNavActive, and never disagree. -->
+              <RouterLink v-slot="{ href, navigate }" :to="item.to" custom>
+                <a
+                  :href="href"
+                  class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-white/8 hover:text-white"
+                  :class="isNavActive(item) ? 'bg-white/12 text-white' : 'text-white/65'"
+                  :aria-current="isNavActive(item) ? 'page' : undefined"
+                  @click="navigate"
                 >
-                  <path :d="icons[item.icon]" />
-                </svg>
-                {{ item.label }}
+                  <svg
+                    class="size-4.5 shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path :d="icons[item.icon]" />
+                  </svg>
+                  {{ item.label }}
+                </a>
               </RouterLink>
             </li>
           </ul>

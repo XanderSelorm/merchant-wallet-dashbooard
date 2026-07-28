@@ -61,6 +61,19 @@
     @apply bg-slate-50 text-slate-900;
   }
 
+  /*
+   * Desktop is an app shell: the rail and the main region are each their own
+   * scroll container, so the document itself must not scroll. Without this the
+   * page keeps a second scrollbar that slides the whole shell out of view.
+   * Below lg the document is the scroller, as a phone expects.
+   */
+  @media (width >= 64rem) {
+    html,
+    body {
+      @apply h-full overflow-hidden;
+    }
+  }
+
   /* Visible focus for every interactive element — keyboard-first a11y */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;

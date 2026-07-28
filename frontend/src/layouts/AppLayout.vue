@@ -13,9 +13,20 @@ const toast = useToast()
 
 const navOpen = ref(false)
 const loggingOut = ref(false)
+const mainPane = ref<HTMLElement | null>(null)
 
-// Close the mobile drawer whenever navigation happens.
-watch(() => route.fullPath, () => (navOpen.value = false))
+watch(
+  () => route.fullPath,
+  () => {
+    navOpen.value = false
+
+    // On desktop the main region scrolls, not the document, so the browser's
+    // own scroll restoration does not apply — reset it by hand. window covers
+    // the mobile case, where the document is still the scroller.
+    mainPane.value?.scrollTo({ top: 0 })
+    window.scrollTo({ top: 0 })
+  },
+)
 
 const nav = [
   { to: { name: 'dashboard' }, label: 'Overview', icon: 'grid', exact: true },
@@ -71,7 +82,13 @@ const initials = (name: string) =>
 </script>
 
 <template>
-  <div class="min-h-screen lg:flex">
+  <!--
+    Desktop is an app shell: the frame is exactly one viewport tall and does
+    not scroll, while the rail and the main region are each their own scroll
+    container. Below lg the document scrolls normally, so the nav drawer and
+    sticky top bar behave as expected on a phone.
+  -->
+  <div class="min-h-screen lg:flex lg:h-screen lg:overflow-hidden">
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-70 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-brand-800 focus:shadow-lg"
@@ -105,7 +122,7 @@ const initials = (name: string) =>
     <!-- Sidebar: static rail on desktop, disclosure panel on mobile -->
     <aside
       id="app-nav"
-      class="on-dark z-20 w-full shrink-0 flex-col justify-between bg-brand-950 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64"
+      class="on-dark z-20 w-full shrink-0 flex-col justify-between bg-brand-950 lg:flex lg:h-full lg:w-64 lg:overflow-y-auto"
       :class="navOpen ? 'flex' : 'hidden'"
     >
       <div class="flex flex-col gap-8 p-4 lg:p-5">
@@ -185,7 +202,11 @@ const initials = (name: string) =>
       </div>
     </aside>
 
-    <main id="main" class="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <main
+      id="main"
+      ref="mainPane"
+      class="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:h-full lg:overflow-y-auto lg:px-8 lg:py-8"
+    >
       <RouterView />
     </main>
 

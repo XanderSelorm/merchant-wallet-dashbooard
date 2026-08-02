@@ -2,16 +2,18 @@ import { AxiosError, AxiosHeaders } from 'axios'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { ensureCsrf, http } from '@/lib/http'
+import { getToken, http, setToken } from '@/lib/http'
 import { useAuthStore } from '@/stores/auth'
 
 vi.mock('@/lib/http', () => ({
   http: { get: vi.fn(), post: vi.fn() },
-  ensureCsrf: vi.fn().mockResolvedValue(undefined),
+  getToken: vi.fn(),
+  setToken: vi.fn(),
 }))
 
 const mocked = vi.mocked(http)
-const mockedEnsureCsrf = vi.mocked(ensureCsrf)
+const mockedGetToken = vi.mocked(getToken)
+const mockedSetToken = vi.mocked(setToken)
 
 const user = { id: 1, name: 'Demo Admin', email: 'admin@kudi.test' }
 
@@ -25,7 +27,7 @@ function httpError(status: number): AxiosError {
 beforeEach(() => {
   setActivePinia(createPinia())
   vi.clearAllMocks()
-  mockedEnsureCsrf.mockResolvedValue(undefined)
+  mockedGetToken.mockReturnValue('stored-token')
 })
 
 describe('init', () => {
@@ -40,11 +42,23 @@ describe('init', () => {
     expect(store.initialized).toBe(true)
   })
 
-  it('treats a 401 as signed out rather than an error, so the guard can redirect', async () => {
+  it('skips the probe entirely when no token is stored', async () => {
+    mockedGetToken.mockReturnValue(null)
+    const store = useAuthStore()
+
+    await store.init()
+
+    expect(mocked.get).not.toHaveBeenCalled()
+    expect(store.user).toBeNull()
+    expect(store.initialized).toBe(true)
+  })
+
+  it('treats a 401 as signed out and clears the stale token, so the guard can redirect', async () => {
     mocked.get.mockRejectedValue(httpError(401))
     const store = useAuthStore()
 
     await expect(store.init()).resolves.toBeUndefined()
+    expect(mockedSetToken).toHaveBeenCalledWith(null)
     expect(store.user).toBeNull()
     expect(store.initialized).toBe(true)
   })
@@ -69,17 +83,17 @@ describe('init', () => {
 })
 
 describe('login', () => {
-  it('primes the CSRF cookie before posting credentials', async () => {
-    mocked.post.mockResolvedValue({ data: { user } })
+  it('stores the returned token and user', async () => {
+    mocked.post.mockResolvedValue({ data: { user, token: 'fresh-token' } })
     const store = useAuthStore()
 
     await store.login('admin@kudi.test', 'password')
 
-    expect(mockedEnsureCsrf).toHaveBeenCalled()
-    expect(mocked.post).toHaveBeenCalledWith('/login', {
+    expect(mocked.post).toHaveBeenCalledWith('/api/login', {
       email: 'admin@kudi.test',
       password: 'password',
     })
+    expect(mockedSetToken).toHaveBeenCalledWith('fresh-token')
     expect(store.user).toEqual(user)
   })
 
@@ -93,7 +107,7 @@ describe('login', () => {
 })
 
 describe('logout', () => {
-  it('clears the user', async () => {
+  it('clears the token and user', async () => {
     mocked.get.mockResolvedValue({ data: user })
     mocked.post.mockResolvedValue({ data: { message: 'Logged out.' } })
     const store = useAuthStore()
@@ -101,7 +115,8 @@ describe('logout', () => {
 
     await store.logout()
 
-    expect(mocked.post).toHaveBeenCalledWith('/logout')
+    expect(mocked.post).toHaveBeenCalledWith('/api/logout')
+    expect(mockedSetToken).toHaveBeenCalledWith(null)
     expect(store.user).toBeNull()
   })
 

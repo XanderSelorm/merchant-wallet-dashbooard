@@ -1,7 +1,7 @@
 import { AxiosError, AxiosHeaders } from 'axios'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
-import { isValidationError, validationErrors } from '@/lib/http'
+import { getToken, isValidationError, setToken, validationErrors } from '@/lib/http'
 
 /** Builds a response-carrying AxiosError the way the interceptor would see it. */
 function axiosErrorWith(status: number, data: unknown): AxiosError {
@@ -19,6 +19,25 @@ const laravel422 = axiosErrorWith(422, {
     email: ['The email has already been taken.', 'A second message for the same field.'],
     account_number: ['The account number must be 8–16 digits.'],
   },
+})
+
+describe('token cookie storage', () => {
+  afterEach(() => setToken(null))
+
+  it('returns null when no token cookie is present', () => {
+    expect(getToken()).toBeNull()
+  })
+
+  it('round-trips a token through the cookie', () => {
+    setToken('abc.def.ghi')
+    expect(getToken()).toBe('abc.def.ghi')
+  })
+
+  it('clears the token when set to null', () => {
+    setToken('abc.def.ghi')
+    setToken(null)
+    expect(getToken()).toBeNull()
+  })
 })
 
 describe('isValidationError', () => {

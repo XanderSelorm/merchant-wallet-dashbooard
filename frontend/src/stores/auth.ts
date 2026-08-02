@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
 
-import { http, ensureCsrf } from '@/lib/http'
+import { http, getToken, setToken } from '@/lib/http'
 import type { User } from '@/types/api'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -12,11 +12,16 @@ export const useAuthStore = defineStore('auth', () => {
   /** Resolve the current session once on app start. */
   async function init(): Promise<void> {
     if (initialized.value) return
+    if (!getToken()) {
+      initialized.value = true
+      return
+    }
     try {
       const { data } = await http.get<User>('/api/user')
       user.value = data
     } catch (error) {
       if (!axios.isAxiosError(error) || error.response?.status !== 401) throw error
+      setToken(null)
       user.value = null
     } finally {
       initialized.value = true
@@ -24,13 +29,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(email: string, password: string): Promise<void> {
-    await ensureCsrf()
-    const { data } = await http.post<{ user: User }>('/login', { email, password })
+    const { data } = await http.post<{ user: User; token: string }>('/api/login', { email, password })
+    setToken(data.token)
     user.value = data.user
   }
 
   async function logout(): Promise<void> {
-    await http.post('/logout')
+    await http.post('/api/logout')
+    setToken(null)
     user.value = null
   }
 
